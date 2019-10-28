@@ -1,9 +1,7 @@
  // a controller to intermediate routes and controllers:
  const User = require('../models/User');
- 
  exports.login = ()=>{}
  exports.logout = ()=>{}
-
 
  exports.register = (req,res)=>{
   // instantiate a new user
