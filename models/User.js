@@ -1,4 +1,6 @@
+const usersCollection = require("../db").collection("users");
 const validator = require('validator')
+
 
 // a model for an individual user
 let User = function(data) {
@@ -7,11 +9,10 @@ let User = function(data) {
 }
 
 User.prototype.cleanInput = function(){
-
   // anything not a string is blocked in validator:
-  if(typeOf(this.data.username) != 'string' ){this.data.username == ""};
-  if(typeOf(this.data.email) != 'string' ){this.data.username == ""};
-  if(typeOf(this.data.password) != 'string' ){this.data.username == ""};
+  if(typeof(this.data.username) != 'string' ){this.data.username == ""};
+  if(typeof(this.data.email) != 'string' ){this.data.username == ""};
+  if(typeof(this.data.password) != 'string' ){this.data.username == ""};
 
   // get rid of unpermitted input properties and purify data for validation and saving:
   this.data = {
@@ -24,7 +25,7 @@ User.prototype.cleanInput = function(){
 User.prototype.validate = function(){
 
   // validate username:
-  if (this.data.username == "") {this.errors.push("You must provide a user name");}
+  if(this.data.username == "") {this.errors.push("You must provide a user name");}
   if(this.data.username != "" && !validator.isAlphanumeric(this.data.username)){this.errors.push("Username can only contain letters and numbers")};
   if (this.data.username.length > 0 && this.data.username.length < 3) {this.errors.push("Username must be at least 3 chars");}
   if (this.data.username.length > 15) {this.errors.push("Username cannot exceed 15 characthers");}
@@ -42,11 +43,14 @@ User.prototype.validate = function(){
 
 // a method to register a new user
 User.prototype.register = function(){
-    // clean data inputs
+    // 1. clean data inputs
     this.cleanInput();
-    // validate user data:
+    // 2. validate user data:
     this.validate();
-    // if no validation error save user:
+    // 3. if no validation error save user:
+    if(!this.errors.length){
+      usersCollection.insertOne(this.data);
+    }
 }
 
 module.exports = User
