@@ -8,7 +8,7 @@ mongodb.connect(
     try {
        module.exports = client.db();
        const app = require("./app");
-       app.listen(3000);
+       app.listen(process.env.PORT);
        console.log("Server is running at localhost")
       
     } catch (error) {

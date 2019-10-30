@@ -4,15 +4,23 @@ const validator = require('validator')
 
 // a model for an individual user
 let User = function(data) {
+  
   this.data = data
   this.errors = []
 }
 
-User.prototype.cleanInput = function(){
+User.prototype.cleanInput = function() {
+
   // anything not a string is blocked in validator:
-  if(typeof(this.data.username) != 'string' ){this.data.username == ""};
-  if(typeof(this.data.email) != 'string' ){this.data.username == ""};
-  if(typeof(this.data.password) != 'string' ){this.data.username == ""};
+  if (typeof this.data.username != "string") {
+    this.data.username = "";
+  }
+  if (typeof this.data.email != "string") {
+    this.data.email = "";
+  }
+  if (typeof this.data.password != "string") {
+    this.data.password = "";
+  }
 
   // get rid of unpermitted input properties and purify data for validation and saving:
   this.data = {
@@ -20,7 +28,7 @@ User.prototype.cleanInput = function(){
     email: this.data.email.trim().toLowerCase(),
     password: this.data.password
   };
-}
+};
 
 User.prototype.validate = function(){
 
@@ -38,6 +46,27 @@ User.prototype.validate = function(){
   if(this.data.password ==""){this.errors.push("You must provide a valid password");}
   if(this.data.password.length > 0 && this.data.password.length <5){ this.errors.push("Password must be at least 5 chars");}
   if(this.data.password.length >100){this.errors.push("Password cannot exceed 100 characthers")}
+
+}
+
+// a methods to login a user
+User.prototype.login = function(){
+
+  console.log(this.data)
+  // 1. clean data inputs
+  this.cleanInput();
+  // call db for given user inputs
+  try {
+    usersCollection.findOne({username:this.data.username},(err, unauthedUser)=>{
+      if(unauthedUser && unauthedUser.password == this.data.password){
+        console.log('user found')
+      }else{
+        console.log('invalid uders')
+      }
+    })
+  } catch (err) {
+      console.error(err.message)
+  }
 
 }
 
