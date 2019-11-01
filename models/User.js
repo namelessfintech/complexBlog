@@ -1,10 +1,8 @@
 const usersCollection = require("../db").collection("users");
 const validator = require('validator')
 
-
 // a model for an individual user
 let User = function(data) {
-  
   this.data = data
   this.errors = []
 }
@@ -60,6 +58,7 @@ User.prototype.login = function(){
     usersCollection.findOne({username:this.data.username},(err, unauthedUser)=>{
       if(unauthedUser && unauthedUser.password == this.data.password){
         console.log('user found')
+        
       }else{
         console.log('invalid uders')
       }
