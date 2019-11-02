@@ -41,19 +41,28 @@ exports.register = (req, res) => {
   // instantiate a new user
   let user = new User(req.body);
   // call register function
-  user.register();
-  // error handiling
-  if (user.errors.length) {
-    res.send(user.errors);
-  } else {
-    res.send("Registered with no errors");
-  }
+  user.register().then(()=>{
+    // log the user in
+    req.session.user = {username: user.data.username}
+    req.session.save(() => {
+      res.redirect("/");
+    });
+  }).catch((regErrors)=>{
+     regErrors.forEach(err => {
+       req.flash("regErrors", err);
+     });
+     req.session.save(() => {
+       res.redirect("/");
+     });
+  })
+
+  
 };
 
 exports.home = (req, res) => {
   if (req.session.user) {
     res.render("home-hub", { username: req.session.user.username });
   } else {
-    res.render("home-guest",{errors: req.flash('errors')});
+    res.render("home-guest",{errors: req.flash('errors'), regErrors:req.flash('regErrors')});
   }
 };
