@@ -6,7 +6,7 @@ mongodb.connect(
   { useNewUrlParser: true, useUnifiedTopology: true },
   function(err, client) {
     try {
-       module.exports = client.db();
+       module.exports = client;
        const app = require("./app");
        app.listen(process.env.PORT);
        console.log("Server is running at localhost")

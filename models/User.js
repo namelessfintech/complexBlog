@@ -1,4 +1,4 @@
-const usersCollection = require("../db").collection("users");
+const usersCollection = require("../db").db().collection("users");
 const validator = require('validator')
 const bcrypt = require('bcryptjs');
 
@@ -29,7 +29,6 @@ User.prototype.cleanInput = function() {
   };
 };
 
-
 // a model method to validate a user input:
 User.prototype.validate = function(){
   // validate username:
@@ -46,7 +45,6 @@ User.prototype.validate = function(){
   if(this.data.password ==""){this.errors.push("You must provide a valid password");}
   if(this.data.password.length > 0 && this.data.password.length <5){ this.errors.push("Password must be at least 5 chars");}
   if(this.data.password.length >50){this.errors.push("Password cannot exceed 50 characthers")}
-
 }
 
 // a callback method to login a user:
@@ -90,7 +88,6 @@ User.prototype.login = function(){
   return new Promise((resolve, reject)=> {
     // 1. clean data inputs
     this.cleanInput();
-
     // 2. call db for a given input using mongos returned promise
     usersCollection.findOne({username:this.data.username}).then((unauthedUser)=>{
       if(unauthedUser && bcrypt.compareSync(this.data.password,unauthedUser.password)){
@@ -98,7 +95,6 @@ User.prototype.login = function(){
       }else{
         resolve('Invalid username / password')
       }
-
     }).catch((err)=> reject('Please try again'))
     
 
