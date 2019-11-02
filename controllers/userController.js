@@ -10,12 +10,20 @@ exports.login = (req, res) => {
     .then(result => {
       // create a unique user session at login
       req.session.user = {anyStoredValue:'I can store any value', username: user.data.username}
-      res.send(result)
+      req.session.save(()=>{
+        res.redirect("/");
+      }); 
     })
     .catch(err => res.send(err));
 };
 
-exports.logout = () => {};
+exports.logout = (req, res) => {
+  // 1. destroy the session
+  // 2. pass cb to redircect once session destroyed
+  req.session.destroy(function(){
+    res.redirect('/');
+  })
+};
 
 exports.register = (req, res) => {
   // instantiate a new user
