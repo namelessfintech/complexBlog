@@ -1,8 +1,7 @@
-const usersCollection = require("../db")
-  .db()
-  .collection("users");
+const usersCollection = require("../db").db().collection("users");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
+const md5 = require('md5');
 
 // a model object for an individual user:
 let User = function(data) {
@@ -126,6 +125,9 @@ User.prototype.login = function() {
           unauthedUser &&
           bcrypt.compareSync(this.data.password, unauthedUser.password)
         ) {
+          // set the data so the session has access
+          this.data = unauthedUser;
+          this.getProfilePic();
           resolve("User Found");
         } else {
           reject("Invalid username / password");
@@ -148,11 +150,17 @@ User.prototype.register = function() {
       let salt = bcrypt.genSaltSync(10);
       this.data.password = bcrypt.hashSync(this.data.password, salt);
       await usersCollection.insertOne(this.data);
+      this.getProfilePic();
       resolve();
     } else {
       reject(this.errors);
     }
   });
 };
+
+// a model method to instantiate a user gravatar:
+User.prototype.getProfilePic = function(){
+  this.profilePic = `https://gravatar.com/avatar/${md5(this.data.email)}?s=128`
+}
 
 module.exports = User;

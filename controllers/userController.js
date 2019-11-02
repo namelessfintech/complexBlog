@@ -11,6 +11,7 @@ exports.login = (req, res) => {
       // create a unique user session at login
       req.session.user = {
         anyStoredValue: "I can store any value",
+        profilePic: user.profilePic,
         username: user.data.username
       };
       // save session to close db and redirect
@@ -43,7 +44,7 @@ exports.register = (req, res) => {
   // call register function
   user.register().then(()=>{
     // log the user in
-    req.session.user = {username: user.data.username}
+    req.session.user = {username: user.data.username, profilePic:user.profilePic}
     req.session.save(() => {
       res.redirect("/");
     });
@@ -61,7 +62,7 @@ exports.register = (req, res) => {
 
 exports.home = (req, res) => {
   if (req.session.user) {
-    res.render("home-hub", { username: req.session.user.username });
+    res.render("home-hub", { username: req.session.user.username , profilePic: req.session.user.profilePic});
   } else {
     res.render("home-guest",{errors: req.flash('errors'), regErrors:req.flash('regErrors')});
   }
