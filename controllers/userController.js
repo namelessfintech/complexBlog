@@ -2,9 +2,9 @@
 const User = require("../models/User");
 
 exports.login = (req, res) => {
-  // instantiate a new user with passed data
+  // 1. instantiate a new user with passed data
   let user = new User(req.body);
-  // call a function to sanitize and check for existing user
+  // 2. call db function to sanitize and check for existing user
   user
     .login()
     .then(result => {
@@ -13,12 +13,13 @@ exports.login = (req, res) => {
         anyStoredValue: "I can store any value",
         username: user.data.username
       };
+      // save session to close db and redirect
       req.session.save(() => {
         res.redirect("/");
       });
     })
     .catch(err => {
-      // add a flash object onto req object
+      // 3. if err add a flash object onto req object and redirect with flash
       req.flash('errors',err)
       // make sure session saves before redirect
       req.session.save(()=>{
