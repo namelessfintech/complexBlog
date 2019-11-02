@@ -3,6 +3,7 @@ const app = express();
 const router = require('./router');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
+const flash = require('connect-flash');
 
 let sessionOptions = session({
   secret:"code like humanity depends on it",
@@ -19,6 +20,7 @@ app.use(express.urlencoded({extended:false}));
 app.use(express.json())
 
 app.use(express.static('public'));
+app.use(flash())
 
 app.set('views','views');
 app.set('view engine','ejs');

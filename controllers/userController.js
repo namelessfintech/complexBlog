@@ -9,20 +9,31 @@ exports.login = (req, res) => {
     .login()
     .then(result => {
       // create a unique user session at login
-      req.session.user = {anyStoredValue:'I can store any value', username: user.data.username}
+      req.session.user = {
+        anyStoredValue: "I can store any value",
+        username: user.data.username
+      };
+      req.session.save(() => {
+        res.redirect("/");
+      });
+    })
+    .catch(err => {
+      // add a flash object onto req object
+      req.flash('errors',err)
+      // make sure session saves before redirect
       req.session.save(()=>{
         res.redirect("/");
-      }); 
-    })
-    .catch(err => res.send(err));
+      })
+      
+    });
 };
 
 exports.logout = (req, res) => {
   // 1. destroy the session
   // 2. pass cb to redircect once session destroyed
-  req.session.destroy(function(){
-    res.redirect('/');
-  })
+  req.session.destroy(function() {
+    res.redirect("/");
+  });
 };
 
 exports.register = (req, res) => {
@@ -39,9 +50,9 @@ exports.register = (req, res) => {
 };
 
 exports.home = (req, res) => {
-  if(req.session.user){
-    res.render("home-hub",{username:req.session.user.username})
-  }else{
-    res.render("home-guest");
+  if (req.session.user) {
+    res.render("home-hub", { username: req.session.user.username });
+  } else {
+    res.render("home-guest",{errors: req.flash('errors')});
   }
 };
