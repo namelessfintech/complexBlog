@@ -1,14 +1,15 @@
 const usersCollection = require("../db").collection("users");
 const validator = require('validator')
+const bcrypt = require('bcryptjs');
 
-// a model for an individual user
+// a model object for an individual user:
 let User = function(data) {
   this.data = data
   this.errors = []
 }
 
+// a model method to sanitize a users input:
 User.prototype.cleanInput = function() {
-
   // anything not a string is blocked in validator:
   if (typeof this.data.username != "string") {
     this.data.username = "";
@@ -28,8 +29,9 @@ User.prototype.cleanInput = function() {
   };
 };
 
-User.prototype.validate = function(){
 
+// a model method to validate a user input:
+User.prototype.validate = function(){
   // validate username:
   if(this.data.username == "") {this.errors.push("You must provide a user name");}
   if(this.data.username != "" && !validator.isAlphanumeric(this.data.username)){this.errors.push("Username can only contain letters and numbers")};
@@ -43,33 +45,67 @@ User.prototype.validate = function(){
   // validate passwords
   if(this.data.password ==""){this.errors.push("You must provide a valid password");}
   if(this.data.password.length > 0 && this.data.password.length <5){ this.errors.push("Password must be at least 5 chars");}
-  if(this.data.password.length >100){this.errors.push("Password cannot exceed 100 characthers")}
+  if(this.data.password.length >50){this.errors.push("Password cannot exceed 50 characthers")}
 
 }
 
-// a methods to login a user
-User.prototype.login = function(){
-
-  console.log(this.data)
-  // 1. clean data inputs
-  this.cleanInput();
-  // call db for given user inputs
-  try {
-    usersCollection.findOne({username:this.data.username},(err, unauthedUser)=>{
-      if(unauthedUser && unauthedUser.password == this.data.password){
-        console.log('user found')
+// a callback method to login a user:
+// User.prototype.login = function(cb){
+//   // 1. clean data inputs
+//   this.cleanInput();
+//   // call db for given user inputs
+//   try {
+//     usersCollection.findOne({username:this.data.username},(err, unauthedUser)=>{
+//       if(unauthedUser && unauthedUser.password == this.data.password){
+//         cb("User")
         
-      }else{
-        console.log('invalid uders')
-      }
-    })
-  } catch (err) {
-      console.error(err.message)
-  }
+//       }else{
+//         cb("Failes")
+//       }
+//     })
+//   } catch (err) {
+//       console.error(err.message)
+//   }
 
+// }
+
+// a simple promise approach to login a user:
+// User.prototype.login = function() {
+//     return new Promise((resolve, reject)=>{
+//       // 1. clean data inputs
+//       this.cleanInput();
+//       // call db for given user inputs
+//       usersCollection.findOne({username:this.data.username},(err,unauthedUser)=>{
+//         if(unauthedUser && unauthedUser.password == this.data.password){
+//           resolve('User Found')
+//         }else{
+//           reject('Invalid username or password')
+//         }
+//       })
+//     })
+// };
+
+// a mongoDB promise approach to login a user:
+User.prototype.login = function(){
+  return new Promise((resolve, reject)=> {
+    // 1. clean data inputs
+    this.cleanInput();
+
+    // 2. call db for a given input using mongos returned promise
+    usersCollection.findOne({username:this.data.username}).then((unauthedUser)=>{
+      if(unauthedUser && bcrypt.compareSync(this.data.password,unauthedUser.password)){
+        resolve('User Found');
+      }else{
+        resolve('Invalid username / password')
+      }
+
+    }).catch((err)=> reject('Please try again'))
+    
+
+  })
 }
 
-// a method to register a new user
+// a model method to register a new user:
 User.prototype.register = function(){
     // 1. clean data inputs
     this.cleanInput();
@@ -77,6 +113,9 @@ User.prototype.register = function(){
     this.validate();
     // 3. if no validation error save user:
     if(!this.errors.length){
+      // 4. salt and hash the user password
+      let salt = bcrypt.genSaltSync(10);
+      this.data.password = bcrypt.hashSync(this.data.password,salt);
       usersCollection.insertOne(this.data);
     }
 }

@@ -2,21 +2,14 @@
 const User = require("../models/User");
 
 exports.login = (req, res) => {
-  
-    console.log("the request orginally", req.body);
   // instantiate a new user with passed data
   let user = new User(req.body);
   // call a function to sanitize and check for existing user
-  user.login();
+  user.login().then((result)=> res.send(result)).catch((err)=> res.send(err));
 };
 
-exports.logout = () => {
 
-  // 1. find user
-  
-  // 2. 
-};
-
+exports.logout = () => {};
 
 exports.register = (req, res) => {
   // instantiate a new user
