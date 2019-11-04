@@ -25,6 +25,12 @@ app.use(flash())
 app.set('views','views');
 app.set('view engine','ejs');
 
+// create a middleware that allows the session data into each template
+app.use(function(req,res,next){
+  res.locals.user = req.session.user
+  next()
+})
+
 app.use('/', router);
 
 module.exports = app

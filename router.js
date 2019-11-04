@@ -14,6 +14,6 @@ router.post("/logout",userController.logout)
 router.get("/about", aboutController.info);
 
 // post routes
-router.get("/create-post", postController.viewCreateForm )
+router.get("/create-post", userController.loggedIn, postController.viewCreateForm )
 
 module.exports = router;

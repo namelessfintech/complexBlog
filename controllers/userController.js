@@ -1,6 +1,16 @@
 // a controller to intermediate routes and controllers:
 const User = require("../models/User");
 
+exports.loggedIn = (req, res, next)=>{
+  if(req.session.user){
+    next()
+  }else{
+    req.flash("errors","You must be loggedin to create a post");
+    req.session.save(function(){
+      res.redirect("/")
+    })
+  }
+}
 exports.login = (req, res) => {
   // 1. instantiate a new user with passed data
   let user = new User(req.body);
@@ -62,7 +72,7 @@ exports.register = (req, res) => {
 
 exports.home = (req, res) => {
   if (req.session.user) {
-    res.render("home-hub", { username: req.session.user.username , profilePic: req.session.user.profilePic});
+    res.render("home-hub");
   } else {
     res.render("home-guest",{errors: req.flash('errors'), regErrors:req.flash('regErrors')});
   }
