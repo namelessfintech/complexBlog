@@ -22,7 +22,8 @@ exports.login = (req, res) => {
       req.session.user = {
         anyStoredValue: "I can store any value",
         profilePic: user.profilePic,
-        username: user.data.username
+        username: user.data.username,
+        _id:user.data._id
       };
       // save session to close db and redirect
       req.session.save(() => {
@@ -54,7 +55,7 @@ exports.register = (req, res) => {
   // call register function
   user.register().then(()=>{
     // log the user in
-    req.session.user = {username: user.data.username, profilePic:user.profilePic}
+    req.session.user = {username: user.data.username, profilePic:user.profilePic, _id: user.data._id}
     req.session.save(() => {
       res.redirect("/");
     });

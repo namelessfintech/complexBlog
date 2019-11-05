@@ -16,4 +16,6 @@ router.get("/about", aboutController.info);
 // post routes
 router.get("/create-post", userController.loggedIn, postController.viewCreateForm )
 
+router.post("/create-post", userController.loggedIn, postController.create)
+
 module.exports = router;
