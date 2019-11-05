@@ -18,6 +18,11 @@ exports.create = function(req, res){
     });
 }
 
-exports.viewPost = function(req, res){
-  res.render('postScreen')
+exports.viewPost = async function(req, res){
+  try{
+    let post = await Post.findPostById(req.params.id);
+    res.render('postScreen', {post:post})
+  } catch{
+    res.send("404 template will go here")
+  }
 }
