@@ -4,9 +4,11 @@ const bcrypt = require("bcryptjs");
 const md5 = require('md5');
 
 // a model object for an individual user:
-let User = function(data) {
+let User = function(data, getProfilePic) {
   this.data = data;
   this.errors = [];
+  if(getProfilePic == undefined){getProfilePic=false}
+  if(getProfilePic){this.getProfilePic()}
 };
 
 // a model method to sanitize a users input:

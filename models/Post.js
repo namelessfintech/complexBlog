@@ -4,6 +4,8 @@ const postsCollection = require("../db")
 
 const ObjectID =  require('mongodb').ObjectID
 
+const User = require('./User');
+
 let Post = function(data, userId) {
   this.data = data
   this.errors = []
@@ -74,11 +76,32 @@ Post.findPostById =  function(id){
       reject()
       return
     }
-    let post = await postsCollection.findOne({_id: new ObjectID(id)})
-    if(post){
-      resolve(post)
+    // implement a search to find the post and user id from post and user documents
+    let posts = await postsCollection.aggregate([
+      {$match: {_id:new ObjectID(id)}},
+      {$lookup: {from: "users", localField: "author", foreignField: "_id", as:"authorDocument"}},
+      {$project: {
+        title:1,
+        body:1,
+        createdAt:1,
+        author:{$arrayElemAt:["$authorDocument",0]}
+      }}
+    ]).toArray()
+
+    // clean up the author property in post object
+    posts.map((post)=>{
+      console.log("from cleanpost obj", post);
+      post.author = {
+        username: post.author.username,
+        profilePic: new User(post.author, true).profilePic
+      }
+    })
+
+    if(posts.length){
+      console.log(posts[0])
+      resolve(posts[0]);
     }else{
-      reject()
+      reject();
     }
   })
 }
