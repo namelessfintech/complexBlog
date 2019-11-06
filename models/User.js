@@ -1,14 +1,20 @@
-const usersCollection = require("../db").db().collection("users");
+const usersCollection = require("../db")
+  .db()
+  .collection("users");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
-const md5 = require('md5');
+const md5 = require("md5");
 
 // a model object for an individual user:
 let User = function(data, getProfilePic) {
   this.data = data;
   this.errors = [];
-  if(getProfilePic == undefined){getProfilePic=false}
-  if(getProfilePic){this.getProfilePic()}
+  if (getProfilePic == undefined) {
+    getProfilePic = false;
+  }
+  if (getProfilePic) {
+    this.getProfilePic();
+  }
 };
 
 // a model method to sanitize a users input:
@@ -161,8 +167,40 @@ User.prototype.register = function() {
 };
 
 // a model method to instantiate a user gravatar:
-User.prototype.getProfilePic = function(){
-  this.profilePic = `https://gravatar.com/avatar/${md5(this.data.email)}?s=128`
-}
+User.prototype.getProfilePic = function() {
+  this.profilePic = `https://gravatar.com/avatar/${md5(this.data.email)}?s=128`;
+};
+
+User.findByUsername = function(username) {
+  return new Promise(function(resolve, reject) {
+    // check for string to protect db, if not reject
+    if (typeof username != "string") {
+      reject();
+      return;
+    }
+    usersCollection
+      .findOne({ username: username })
+      .then(foundUser => {
+        if (foundUser) {
+          console.log(foundUser)
+          // create a custom user object to not expose extra data
+          foundUser = new User(foundUser, true);
+          foundUser = {
+            _id: foundUser.data._id,
+            username: foundUser.data.username,
+            profilePic: foundUser.profilePic
+          };
+          console.log("found user clean", foundUser)
+          resolve(foundUser);
+        } else {
+          // if user not found reject
+          reject();
+        }
+      })
+      .catch(() => {
+        reject();
+      });
+  });
+};
 
 module.exports = User;
